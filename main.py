@@ -61,7 +61,7 @@ def second_process():
     fl_go = 'go'
     while fl_go == 'go':
         # таймер работы бота
-        time.sleep(random.randint(60, 3600))
+        time.sleep(random.randint(60, 1800))  # посылаем анекдоты раз в 30 минут, чтобы не заснул бот на бесплатном аккаунте в heroky
         fl = 'start'
         if fl == 'start':
             bot.send_message(CHANNEL_NAME, random.choice(funs))
