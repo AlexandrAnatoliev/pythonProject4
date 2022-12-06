@@ -47,8 +47,8 @@ def handle_text(message):
     # Если юзер прислал 1, выдаем ему случайный анекдот
     if message.text.strip() == 'Анекдот':
         answer = random.choice(funs)
-    # Отсылаем юзеру сообщение в его чат
-    bot.send_message(message.chat.id, answer)
+        # Отсылаем юзеру сообщение в его чат
+        bot.send_message(message.chat.id, answer)
 
 
 def first_process():

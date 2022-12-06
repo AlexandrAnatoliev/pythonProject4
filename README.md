@@ -1,12 +1,16 @@
-# pythonProject3
+# pythonProject4
 
-[Ru] БОТ, ДЛЯ TELEGRAM-КАНАЛА С АНЕКДОТАМИ. Параллельное выполнение двух задач. Задача 1: по нажатию кнопки бот присылает случайный анекдот в личку
-# Задача 2: бот получает список анекдотов из файла и случайные шутки через случайные периоды времени постит в канал.
+[Ru] БОТ, ДЛЯ TELEGRAM-КАНАЛА С АНЕКДОТАМИ. 
+## Описание
+Параллельное выполнение двух задач. Задача 1: по нажатию кнопки бот присылает случайный анекдот в личку. Задача 2: бот получает список анекдотов из файла и случайные шутки через случайные периоды времени постит в канал.
 
 ## Требования
 
-* $ pip install -r требования.txt
-* создать файл funs.txt, который содержит список анекдотов. ВАЖНО! На каждой строке файлов находится по одному анекдоту
+* Установить внешние зависимости
+* $ pip install -r requirements.txt
+* Создать свой канал в Telegram, добавить в подписчики канала нашего бота и назначить его администратором канала с
+  правом публиковать сообщения.
+* Создать файл с анекдотами fun.txt и размесить в папке со скриптом бота. ВАЖНО! Каждый анекдот должен начинаться с новой строки
 * создать файл config.py, в котором будут храниться токен для доступа к боту и адрес канала в виде
 ```python
 token = "1234567890:ASDFGHH..."
@@ -18,10 +22,12 @@ channel = '@topjokes...'
 
 ## Подключаем модули
 ```python
+from multiprocessing import Process
+from telebot import types
 import telebot
 import random
-from telebot import types
-from config import token
+import time
+from config import token, channel
 ```
 
 ## Примеры использования
@@ -47,7 +53,43 @@ def start(m, res=False):
                      'Нажми: \nАнекдот для получения интересного анекдота ',
                      reply_markup=markup)
 ```
-#### Запускаем бота
+#### запускаем два процесса параллельно
 ```python
-bot.polling(none_stop=True, interval=0)
+if __name__ == '__main__':
+    p1 = Process(target=first_process, daemon=True)
+    p2 = Process(target=second_process, daemon=True)
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
+```
+#### Первый процесс - бот посылает анекдот пользователю в личку
+```python
+def first_process():
+    # Запускаем бота, присылающего анекдоты в личку - задача 1
+    bot.polling(none_stop=True, interval=0)
+```
+
+#### Отрабатываем сообщение от пользователя - нажатие кнопки "Анекдот"
+```python
+@bot.message_handler(content_types=["text"])
+def handle_text(message):
+    # Если юзер прислал 1, выдаем ему случайный анекдот
+    if message.text.strip() == 'Анекдот':
+        answer = random.choice(funs)
+        # Отсылаем юзеру сообщение в его чат
+        bot.send_message(message.chat.id, answer)
+```
+#### Второй процесс - бот посылает случайный анекдот в канал через случайный период времени
+```python
+def second_process():
+    # запускаем бота, посылающего анекдоты в канал - задача 2
+    fl_go = 'go'
+    while fl_go == 'go':
+        # таймер работы бота
+        time.sleep(random.randint(60, 3600))
+        fl = 'start'
+        if fl == 'start':
+            bot.send_message(CHANNEL_NAME, random.choice(funs))
+            fl = 'stop'
 ```
